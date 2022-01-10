@@ -25,7 +25,7 @@ contract BaseContract {
         propertyCode = _propertyCode;
     }
 
-   
+
 
     modifier  onlySeller{
         require(
@@ -70,7 +70,7 @@ contract BaseContract {
     }
 
     function buyProperty() payable public isActivated buyRequirement notPaused {
-        
+        buyer = msg.sender;
         payable(seller).transfer(msg.value);
         //require(sent,"not sent !");
         emit propertyBought(buyer, seller, price);
@@ -78,8 +78,11 @@ contract BaseContract {
 
 
     function deActivate() public onlySeller {
+        activated = false;
+    }
+
+    function Activate() public onlySeller {
         activated = true;
     }
 
-    
 }
