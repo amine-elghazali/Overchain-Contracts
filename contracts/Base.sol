@@ -12,36 +12,20 @@ contract BaseContract {
     uint256 public price;
 
     bool public paused = false;
-    bool public cancel = false;
+    bool public activated = true;
 
     event propertyBought(address from,address to,uint256 price);
 
-    event propertyDeployed(address ,uint256, string );
-
-    constructor() {
-        owner = msg.sender;
-    }
-
-    /*constructor(address payable _seller,uint256 _price,uint256 _minPrice ,string memory _propertyCode){
-
+    constructor(address payable _seller,uint256 _price,uint256 _minPrice ,string memory _propertyCode){
         require( _price >= _minPrice );
-
         owner = msg.sender;
         seller = _seller;
         price = _price;
         minPrice = _minPrice;
         propertyCode = _propertyCode;
-    
-        emit propertyDeployed(seller, price, propertyCode);
     }
-*/
 
-    modifier  onlyOwner{
-        require(
-            owner == msg.sender
-            );
-        _;
-    }
+   
 
     modifier  onlySeller{
         require(
@@ -53,7 +37,7 @@ contract BaseContract {
 
     modifier  buyRequirement{
         require(
-            price == msg.value,
+            price >= msg.value,
             "not enough to buy this property"
             );
         _;
@@ -66,38 +50,36 @@ contract BaseContract {
         _;
     }
 
+    modifier isActivated() {
+        require(
+            activated == true
+        );
+        _;
+    }
 
-    function changePrice(uint256 _price) onlySeller public{
+
+    function changePrice(uint256 _price) isActivated onlySeller public{
         require( _price >= minPrice );
         price = _price ;
     }
     
 
-    function changeMinPrice(uint256 _minPrice) onlySeller public{
+    function changeMinPrice(uint256 _minPrice) isActivated onlySeller public{
         require( price >= _minPrice );
         minPrice = _minPrice ;
     }
 
-
-     function addProperty(address _seller,uint256 _price,uint256 _minPrice ,string memory _propertyCode) public onlyOwner{
-
-        require( _price >= _minPrice );
-
-        seller = _seller;
-        price = _price;
-        minPrice = _minPrice;
-        propertyCode = _propertyCode;
-       
-        emit propertyDeployed(seller, price, propertyCode);
-    }
-
-
-
-    function signContract(address _buyer) payable public buyRequirement notPaused {
-        buyer = _buyer;
-        //(bool sent, bytes memory data) = payable(seller).call{value: msg.value}("");
+    function buyProperty() payable public isActivated buyRequirement notPaused {
+        
         payable(seller).transfer(msg.value);
         //require(sent,"not sent !");
         emit propertyBought(buyer, seller, price);
     }
+
+
+    function deActivate() public onlySeller {
+        activated = true;
+    }
+
+    
 }
