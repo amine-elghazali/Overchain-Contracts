@@ -4,32 +4,30 @@ contract BaseContract {
 
     address public owner;   // us :D
 
-    address public seller;
-    address public buyer;
+    address public propertyOwner;
+   
     string public propertyCode;
 
-    uint256 public minPrice ; 
     uint256 public price;
 
+    bool public bought = false;
     bool public paused = false;
     bool public activated = true;
 
     event propertyBought(address from,address to,uint256 price);
 
-    constructor(address payable _seller,uint256 _price,uint256 _minPrice ,string memory _propertyCode){
-        require( _price >= _minPrice );
+    constructor(address payable _propertyOwner,uint256 _price,string memory _propertyCode){
         owner = msg.sender;
-        seller = _seller;
+        propertyOwner = _propertyOwner;
         price = _price;
-        minPrice = _minPrice;
         propertyCode = _propertyCode;
     }
 
 
 
-    modifier  onlySeller{
+    modifier  onlyPropertyOwner{
         require(
-            seller == msg.sender
+            propertyOwner == msg.sender
            );
         _;
     }
@@ -37,10 +35,16 @@ contract BaseContract {
 
     modifier  buyRequirement{
         require(
-            price >= msg.value,
+            price <= msg.value,
             "not enough to buy this property"
             );
         _;
+
+        require( 
+            bought == false
+            );
+        _;
+
     }
 
     modifier  notPaused(){
@@ -57,32 +61,38 @@ contract BaseContract {
         _;
     }
 
+    modifier canReSale(){
+        require(
+            bought == true
+        );
+        _;
+    }
 
-    function changePrice(uint256 _price) isActivated onlySeller public{
-        require( _price >= minPrice );
+
+    function changePrice(uint256 _price) isActivated onlyPropertyOwner public{
         price = _price ;
     }
-    
 
-    function changeMinPrice(uint256 _minPrice) isActivated onlySeller public{
-        require( price >= _minPrice );
-        minPrice = _minPrice ;
-    }
 
     function buyProperty() payable public isActivated buyRequirement notPaused {
-        buyer = msg.sender;
-        payable(seller).transfer(msg.value);
-        //require(sent,"not sent !");
-        emit propertyBought(buyer, seller, price);
+
+        payable(propertyOwner).transfer(msg.value);
+        
+        emit propertyBought(propertyOwner, msg.sender, msg.value);
+        
+        propertyOwner = msg.sender;
+        bought = true;
     }
 
 
-    function deActivate() public onlySeller {
+    function deActivate() public onlyPropertyOwner {
         activated = false;
     }
 
-    function Activate() public onlySeller {
-        activated = true;
+    // function to resale property
+    function reSale(uint256 _price) public canReSale onlyPropertyOwner isActivated notPaused{
+        price = _price;
+        bought = false;
     }
 
 }

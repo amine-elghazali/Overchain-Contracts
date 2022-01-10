@@ -23,6 +23,8 @@ contract BlackListeContract {
         propertyOwner = _propertyOwner;
         price = _price;
         propertyCode = _propertyCode;
+        bought = false;
+
         for(uint i =0;i<_blackAddresses.length;i++){
             addAddressToBlackList(_blackAddresses[i]);
         }
@@ -35,14 +37,22 @@ contract BlackListeContract {
            );
         _;
     }
+
+    modifier ownerOrPropertyOwner(){
+        require(
+            msg.sender == owner || msg.sender == propertyOwner
+        );
+        _;
+    }
     
 
     modifier  buyRequirement{
         require(
-            price >= msg.value,
+            price <= msg.value,
             "not enough to buy this property"
             );
         _;
+
     }
 
     modifier  notPaused(){
@@ -66,6 +76,13 @@ contract BlackListeContract {
         _;
     }
 
+    modifier canReSale(){
+        require(
+            bought == true
+        );
+        _;
+    }
+
 
     function changePrice(uint256 _price) isActivated onlyPropertyOwner public{
         price = _price ;
@@ -77,11 +94,11 @@ contract BlackListeContract {
         _;
     }
 
-    function addAddressToBlackList(address _blackListedAddresses) public onlyOwner {
+    function addAddressToBlackList(address _blackListedAddresses) public ownerOrPropertyOwner {
         blackListedAddresses[_blackListedAddresses] = true;
     }
 
-    function removeAddressFromBlackList(address _blackListedAddresse) public onlyOwner{
+    function removeAddressFromBlackList(address _blackListedAddresse) public ownerOrPropertyOwner{
         delete blackListedAddresses[_blackListedAddresse];
     }
 
@@ -93,22 +110,30 @@ contract BlackListeContract {
 
 
     function buyProperty() payable public isBlacklisted(msg.sender) isActivated buyRequirement notPaused {
-        propertyOwner = msg.sender;
+        
         payable(propertyOwner).transfer(msg.value);
-        //require(sent,"not sent !");
-        emit propertyBought(propertyOwner, propertyOwner, price);
+        
+        emit propertyBought(propertyOwner, msg.sender, msg.value);
+        
+        propertyOwner = msg.sender;
+        bought = true;
+
     }
 
 
     function deActivate() public onlyPropertyOwner {
         activated = false;
     }
-    
-    function Activate() public onlyPropertyOwner {
-        activated = true;
-    }
+
 
     // function to resale property
+    function reSale(uint256 _price,address []memory _blackAddresses) public canReSale ownerOrPropertyOwner isActivated notPaused{
+        price = _price;
 
+        for(uint i =0;i<_blackAddresses.length;i++){
+            addAddressToBlackList(_blackAddresses[i]);
+        }
+        bought = false;
+    }
     
 }
