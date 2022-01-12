@@ -43,11 +43,6 @@ contract WhiteListeContract {
             "not enough to buy this property"
             );
         _;
-
-        require(
-            bought == false
-        );
-        _;
     }
 
     modifier  notPaused(){

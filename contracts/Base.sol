@@ -40,11 +40,6 @@ contract BaseContract {
             );
         _;
 
-        require( 
-            bought == false
-            );
-        _;
-
     }
 
     modifier  notPaused(){
