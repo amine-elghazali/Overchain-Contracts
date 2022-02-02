@@ -14,7 +14,7 @@ contract BlackListeContract {
     bool public paused = false;
     bool public activated = true;
 
-    mapping(address => bool) blackListedAddresses;
+    mapping(address => bool) public blackListedAddresses;
 
     event propertyBought(address from,address to,uint256 price);
 
@@ -24,12 +24,10 @@ contract BlackListeContract {
         price = _price;
         propertyCode = _propertyCode;
         bought = false;
-
         for(uint i =0;i<_blackAddresses.length;i++){
             addAddressToBlackList(_blackAddresses[i]);
         }
     }
-
    
     modifier  onlyPropertyOwner{
         require(
@@ -44,7 +42,6 @@ contract BlackListeContract {
         );
         _;
     }
-    
 
     modifier  buyRequirement{
         require(
@@ -52,7 +49,6 @@ contract BlackListeContract {
             "not enough to buy this property"
             );
         _;
-
     }
 
     modifier  notPaused(){
@@ -123,6 +119,14 @@ contract BlackListeContract {
 
     function deActivate() public onlyPropertyOwner {
         activated = false;
+    }
+
+    function Pause() public onlyPropertyOwner {
+        paused = true;
+    }
+
+    function UnPause()public onlyPropertyOwner{
+        paused = false ; 
     }
 
 

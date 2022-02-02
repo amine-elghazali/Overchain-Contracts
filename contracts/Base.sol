@@ -40,6 +40,8 @@ contract BaseContract {
             );
         _;
 
+
+
     }
 
     modifier  notPaused(){
@@ -82,6 +84,14 @@ contract BaseContract {
 
     function deActivate() public onlyPropertyOwner {
         activated = false;
+    }
+
+    function Pause() public onlyPropertyOwner {
+        paused = true;
+    }
+
+    function UnPause()public onlyPropertyOwner{
+        paused = false ; 
     }
 
     // function to resale property

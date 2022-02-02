@@ -14,7 +14,7 @@ contract WhiteListeContract {
     bool public paused = false;
     bool public activated = true;
 
-    mapping(address => bool) whiteListedAddresses;
+    mapping(address => bool) public whiteListedAddresses;
 
     event propertyBought(address from,address to,uint256 price);
 
@@ -36,6 +36,12 @@ contract WhiteListeContract {
         _;
     }
     
+    modifier ownerOrPropertyOwner(){
+        require(
+            msg.sender == owner || msg.sender == propertyOwner
+        );
+        _;
+    }
 
     modifier  buyRequirement{
         require(
@@ -62,13 +68,6 @@ contract WhiteListeContract {
     modifier onlyOwner(){
         require(
             owner == msg.sender
-        );
-        _;
-    }
-
-    modifier ownerOrPropertyOwner(){
-        require(
-            msg.sender == owner || msg.sender == propertyOwner
         );
         _;
     }
@@ -118,6 +117,14 @@ contract WhiteListeContract {
 
     function deActivate() public onlyPropertyOwner {
         activated = false;
+    }
+
+    function Pause() public onlyPropertyOwner {
+        paused = true;
+    }
+
+    function UnPause()public onlyPropertyOwner{
+        paused = false ; 
     }
 
     // function to resale property
