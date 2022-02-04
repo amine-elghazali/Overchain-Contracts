@@ -121,11 +121,11 @@ contract BlackListeContract {
         activated = false;
     }
 
-    function Pause() public onlyPropertyOwner {
+    function pauseContract() public onlyPropertyOwner {
         paused = true;
     }
 
-    function UnPause()public onlyPropertyOwner{
+    function unPauseContract()public onlyPropertyOwner{
         paused = false ; 
     }
 

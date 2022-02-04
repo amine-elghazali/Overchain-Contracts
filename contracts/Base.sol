@@ -86,13 +86,14 @@ contract BaseContract {
         activated = false;
     }
 
-    function Pause() public onlyPropertyOwner {
+    function pauseContract() public onlyPropertyOwner{
         paused = true;
     }
 
-    function UnPause()public onlyPropertyOwner{
+    function unPauseContract()public onlyPropertyOwner{
         paused = false ; 
     }
+
 
     // function to resale property
     function reSale(uint256 _price) public canReSale onlyPropertyOwner isActivated notPaused{
